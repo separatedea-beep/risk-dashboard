@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risk Management Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── HEADER ─────────────────────────────────────────────── -->
+  <header class="header">
+    <div class="logo">RISK<span>//</span>OPS</div>
+    <div style="width:1px;height:20px;background:var(--border);"></div>
+    <div style="font-size:11px;color:var(--text2);">Broker Risk Management Dashboard</div>
+    <div class="header-status">
+      <div class="live-badge"><div class="live-dot"></div>LIVE</div>
+      <div class="header-clock">NY: <span id="ny-time">--:--:--</span></div>
+      <div class="header-clock">LN: <span id="ln-time">--:--:--</span></div>
+      <div class="header-clock">HK: <span id="hk-time">--:--:--</span></div>
+    </div>
+  </header>
+
+  <!-- ── SIDEBAR ────────────────────────────────────────────── -->
+  <nav class="sidebar">
+    <div class="nav-section">Monitor</div>
+    <div class="nav-item active" onclick="showView('overview', this)">
+      <div class="nav-icon">◈</div> Overview
+    </div>
+    <div class="nav-item" onclick="showView('exposure', this)">
+      <div class="nav-icon">⬡</div> Exposure
+      <div class="nav-badge amber" id="exp-badge">1</div>
+    </div>
+    <div class="nav-item" onclick="showView('sessions', this)">
+      <div class="nav-icon">⬢</div> LP Sessions
+    </div>
+    <div class="nav-item" onclick="showView('traders', this)">
+      <div class="nav-icon">◆</div> Traders
+      <div class="nav-badge" id="traders-badge">3</div>
+    </div>
+    <div class="nav-section" style="margin-top:8px">Finance</div>
+    <div class="nav-item" onclick="showView('pnl', this)">
+      <div class="nav-icon">▸</div> P&L Summary
+    </div>
+    <div class="nav-item" onclick="showView('emi', this)">
+      <div class="nav-icon">◉</div> EMI Balances
+    </div>
+    <div class="nav-section" style="margin-top:8px">Operations</div>
+    <div class="nav-item" onclick="showView('recon', this)">
+      <div class="nav-icon">≡</div> Reconciliation
+      <div class="nav-badge green" id="recon-badge">✓</div>
+    </div>
+    <div class="nav-item" onclick="showView('alerts', this)">
+      <div class="nav-icon">△</div> Alerts
+      <div class="nav-badge" id="alert-badge">2</div>
+    </div>
+    <div class="nav-item" onclick="showView('stopouts', this)">
+      <div class="nav-icon">⊘</div> Stop-outs
+    </div>
+  </nav>
+
+  <!-- ── MAIN ───────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: OVERVIEW
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view active" id="view-overview">
+      <div class="page-title">Overview <span>/ Real-time snapshot</span></div>
+
+      <div class="metrics-grid">
+        <div class="metric-card green-c">
+          <div class="metric-label">Net Profit / Mo</div>
+          <div class="metric-value green" id="m-profit">$53,478</div>
+          <div class="metric-sub"><span class="up">↑ 3.2%</span>&nbsp;vs last month</div>
+        </div>
+        <div class="metric-card accent">
+          <div class="metric-label">Gross Revenue / Mo</div>
+          <div class="metric-value accent" id="m-revenue">$107,745</div>
+          <div class="metric-sub"><span id="m-active-clients">247</span> active clients</div>
+        </div>
+        <div class="metric-card amber-c" id="mc-bbook">
+          <div class="metric-label">B-book Utilisation</div>
+          <div class="metric-value amber" id="m-bbook-pct">43.6%</div>
+          <div class="metric-sub" id="m-bbook-sub">$2.18M / $5.00M limit</div>
+        </div>
+        <div class="metric-card accent" id="mc-margin">
+          <div class="metric-label">LP Margin Used</div>
+          <div class="metric-value" id="m-margin-pct">58.3%</div>
+          <div class="metric-sub" id="m-margin-sub">$87,400 / $150,000</div>
+        </div>
+      </div>
+
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-label">Open Positions</div>
+          <div class="metric-value" id="m-positions">1,834</div>
+          <div class="metric-sub">A+B book combined</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Unrealised P&L</div>
+          <div class="metric-value green" id="m-upnl">+$12,840</div>
+          <div class="metric-sub">across open book</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">EMI Float Income</div>
+          <div class="metric-value green">$75,000</div>
+          <div class="metric-sub">per month @ 4.5%</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Stop-out Candidates</div>
+          <div class="metric-value amber" id="m-stopout-count">3</div>
+          <div class="metric-sub">margin level &lt; 150%</div>
+        </div>
+      </div>
+
+      <div class="panels-3">
+        <!-- Exposure bars -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">B-book Exposure</div>
+            <div class="panel-tag tag-amber">% of limit</div>
+          </div>
+          <div class="panel-body" id="exp-bars-overview"></div>
+        </div>
+
+        <!-- LP margin arc + LP status -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">LP Margin</div>
+          </div>
+          <div class="panel-body" style="padding:8px 14px">
+            <div class="gauge-wrap">
+              <svg id="gauge-svg" viewBox="0 0 120 70" width="120" height="70">
+                <path d="M15,65 A50,50 0 0,1 105,65" fill="none" stroke="#1a2130" stroke-width="8" stroke-linecap="round"/>
+                <path id="gauge-arc" d="M15,65 A50,50 0 0,1 105,65" fill="none" stroke="#00d4ff" stroke-width="8" stroke-linecap="round" stroke-dasharray="0 157"/>
+                <text x="60" y="62" text-anchor="middle" font-family="Space Mono" font-size="14" font-weight="700" fill="#e8edf5" id="gauge-text">58%</text>
+              </svg>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-top:4px">
+              <div class="data-row">
+                <span class="data-row-label">Collateral</span>
+                <span class="data-row-val">$150,000</span>
+              </div>
+              <div class="data-row">
+                <span class="data-row-label">Used</span>
+                <span class="data-row-val amber" id="gauge-used">$87,400</span>
+              </div>
+              <div class="data-row">
+                <span class="data-row-label">Available</span>
+                <span class="data-row-val green" id="gauge-avail">$62,600</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Session mini -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Session Health</div>
+          </div>
+          <div class="panel-body" id="session-mini-body"></div>
+        </div>
+      </div>
+
+      <!-- Alerts preview -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Active Alerts</div>
+          <div class="panel-tag tag-amber" id="alerts-count-tag">2 active</div>
+        </div>
+        <div class="panel-body" id="alerts-preview"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: EXPOSURE
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-exposure">
+      <div class="page-title">Exposure <span>/ B-book net positions</span></div>
+
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-title">Net B-book Exposure per Instrument</div>
+          <button class="hedge-btn" onclick="triggerHedge()">⊠ HEDGE ALL</button>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <table class="tbl" style="padding:0 14px">
+            <thead>
+              <tr>
+                <th style="padding-left:14px">Symbol</th>
+                <th>Direction</th>
+                <th>Net ($)</th>
+                <th>Limit ($)</th>
+                <th>Utilisation</th>
+                <th style="padding-right:14px">Status</th>
+              </tr>
+            </thead>
+            <tbody id="exp-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panels-2">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Exposure History — 12h</div>
+          </div>
+          <div class="panel-body">
+            <div class="chart-wrap">
+              <canvas id="exp-chart"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Correlation Risk</div>
+          </div>
+          <div class="panel-body">
+            <div class="data-row"><span class="data-row-label">EUR/USD + GBP/USD</span><span class="data-row-val amber">0.87 HIGH</span></div>
+            <div class="data-row"><span class="data-row-label">XAU/USD + USD/JPY</span><span class="data-row-val red">-0.72 INV</span></div>
+            <div class="data-row"><span class="data-row-label">US30 + NAS100</span><span class="data-row-val amber">0.91 HIGH</span></div>
+            <div class="data-row"><span class="data-row-label">WTI + AUD/USD</span><span class="data-row-val" style="color:var(--text2)">0.43 MED</span></div>
+            <div class="data-row" style="border-top:1px solid var(--border);margin-top:4px;padding-top:8px">
+              <span class="data-row-label" style="color:var(--amber)">⚠ High correlation detected</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: LP SESSIONS
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-sessions">
+      <div class="page-title">LP Sessions <span>/ FIX connectivity</span></div>
+
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-title">Active FIX Sessions</div>
+        </div>
+        <div class="panel-body" style="padding:0 14px">
+          <div class="session-row session-row-header">
+            <span>LP / Session</span>
+            <span>Status</span>
+            <span style="text-align:right">Latency</span>
+            <span style="text-align:right">Reject %</span>
+            <span style="text-align:right">Uptime</span>
+          </div>
+          <div id="sessions-full-body"></div>
+        </div>
+      </div>
+
+      <div class="panels-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Latency History — IS Prime</div></div>
+          <div class="panel-body">
+            <div class="chart-wrap"><canvas id="lat-chart"></canvas></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Fill Speed Distribution</div></div>
+          <div class="panel-body">
+            <div class="data-row"><span class="data-row-label">Under 50ms</span><span class="data-row-val green">68.4%</span></div>
+            <div class="data-row"><span class="data-row-label">50–100ms</span><span class="data-row-val green">24.1%</span></div>
+            <div class="data-row"><span class="data-row-label">100–200ms</span><span class="data-row-val amber">6.2%</span></div>
+            <div class="data-row"><span class="data-row-label">200–500ms</span><span class="data-row-val amber">1.1%</span></div>
+            <div class="data-row"><span class="data-row-label">Over 500ms</span><span class="data-row-val red">0.2%</span></div>
+            <div class="data-row" style="margin-top:4px;border-top:1px solid var(--border);padding-top:8px">
+              <span class="data-row-label">Rejection rate</span>
+              <span class="data-row-val green">0.3% ✓</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: P&L
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-pnl">
+      <div class="page-title">P&L Summary <span>/ Current month</span></div>
+
+      <div class="panels-2">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Revenue Breakdown</div></div>
+          <div class="panel-body">
+            <div class="data-row"><span class="data-row-label">Spread markup</span><span class="data-row-val green" id="p-spread">$13,065</span></div>
+            <div class="data-row"><span class="data-row-label">Commission (ECN/VIP)</span><span class="data-row-val green" id="p-comm">$3,900</span></div>
+            <div class="data-row"><span class="data-row-label">Swap / overnight</span><span class="data-row-val green" id="p-swap">$1,755</span></div>
+            <div class="data-row"><span class="data-row-label">B-book net P&L</span><span class="data-row-val green" id="p-bbook">$3,900</span></div>
+            <div class="data-row"><span class="data-row-label">EMI float income</span><span class="data-row-val green">$75,000</span></div>
+            <div class="data-row" style="border-top:1px solid var(--border2);margin-top:4px;padding-top:8px">
+              <span class="data-row-label" style="font-weight:600;color:var(--text)">Gross Revenue</span>
+              <span class="data-row-val accent" style="font-size:15px" id="p-gross">$107,745</span>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Cost Breakdown</div></div>
+          <div class="panel-body">
+            <div class="data-row"><span class="data-row-label">Staff (3 external)</span><span class="data-row-val red">$7,300</span></div>
+            <div class="data-row"><span class="data-row-label">Infrastructure</span><span class="data-row-val red">$4,200</span></div>
+            <div class="data-row"><span class="data-row-label">Regulatory & compliance</span><span class="data-row-val red">$3,567</span></div>
+            <div class="data-row"><span class="data-row-label">LP commission (A-book)</span><span class="data-row-val red">$3,500</span></div>
+            <div class="data-row"><span class="data-row-label">IB payouts</span><span class="data-row-val red">$35,700</span></div>
+            <div class="data-row" style="border-top:1px solid var(--border2);margin-top:4px;padding-top:8px">
+              <span class="data-row-label" style="font-weight:600;color:var(--text)">Net Profit</span>
+              <span class="data-row-val green" style="font-size:15px" id="p-net">$53,478</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-full">
+        <div class="panel-header"><div class="panel-title">Monthly Revenue Trend</div></div>
+        <div class="panel-body">
+          <div class="chart-wrap" style="height:160px;"><canvas id="revenue-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: EMI BALANCES
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-emi">
+      <div class="page-title">EMI Balances <span>/ Segregated client funds</span></div>
+
+      <div class="emi-grid">
+        <div class="emi-card">
+          <div class="emi-flag">🇲🇺</div>
+          <div class="emi-name">Mauritius EMI</div>
+          <div class="emi-balance" id="emi-mu">$1,640,000</div>
+          <div class="emi-label">Segregated pool</div>
+          <div class="emi-status"><span class="panel-tag tag-green">HEALTHY</span></div>
+        </div>
+        <div class="emi-card">
+          <div class="emi-flag">🇸🇬</div>
+          <div class="emi-name">Singapore EMI (MAS)</div>
+          <div class="emi-balance" id="emi-sg">$2,180,000</div>
+          <div class="emi-label">Segregated pool</div>
+          <div class="emi-status"><span class="panel-tag tag-green">HEALTHY</span></div>
+        </div>
+        <div class="emi-card">
+          <div class="emi-flag">🇭🇰</div>
+          <div class="emi-name">Hong Kong EMI</div>
+          <div class="emi-balance" id="emi-hk">$1,000,000</div>
+          <div class="emi-label">Segregated pool</div>
+          <div class="emi-status"><span class="panel-tag tag-green">HEALTHY</span></div>
+        </div>
+      </div>
+
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-title">Segregation Check</div>
+          <div class="panel-tag tag-green" id="seg-status-tag">✓ SEGREGATED</div>
+        </div>
+        <div class="panel-body" style="padding:0 14px">
+          <div class="data-row">
+            <span class="data-row-label">Total client balances owed</span>
+            <span class="data-row-val">$4,820,000</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Total EMI segregated pool</span>
+            <span class="data-row-val accent" id="emi-total">$4,820,000</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Surplus / (Deficit)</span>
+            <span class="data-row-val green" id="emi-surplus">$0</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Operational capital (separate)</span>
+            <span class="data-row-val">$477,500</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Deposits today</span>
+            <span class="data-row-val green">+$124,500</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Withdrawals today</span>
+            <span class="data-row-val red">-$67,200</span>
+          </div>
+          <div class="data-row">
+            <span class="data-row-label">Net flow today</span>
+            <span class="data-row-val green">+$57,300</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: RECONCILIATION
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-recon">
+      <div class="page-title">Reconciliation <span>/ Daily three-way match</span></div>
+
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-title">Daily Reconciliation Status</div>
+          <div class="panel-tag tag-green" id="recon-status-tag">✓ ALL MATCHED</div>
+        </div>
+        <div style="padding:0 14px">
+          <div class="recon-grid">
+            <div class="recon-head">Reconciliation Item</div>
+            <div class="recon-head" style="text-align:right">Source A (LP)</div>
+            <div class="recon-head" style="text-align:right">Source B (BO)</div>
+            <div class="recon-head" style="text-align:center">Status</div>
+          </div>
+          <div id="recon-rows"></div>
+        </div>
+        <div style="padding:10px 14px;border-top:1px solid var(--border)">
+          <div style="background:rgba(0,230,118,0.07);border:1px solid rgba(0,230,118,0.15);border-radius:4px;padding:8px 12px;font-size:12px;color:var(--green);font-family:var(--mono)">
+            ✓ ALL CHECKS PASSED — Zero breaks — Signed off 17:04 UTC
+          </div>
+        </div>
+      </div>
+
+      <div class="panel panel-full">
+        <div class="panel-header"><div class="panel-title">Break Log — Last 7 days</div></div>
+        <div class="panel-body" style="padding:0 14px">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th style="padding-left:0">Date</th>
+                <th>Type</th>
+                <th>Amount</th>
+                <th>Cause</th>
+                <th style="padding-right:0">Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="mono dimmer">2024-01-14</td><td>Timing diff</td><td class="mono">$2,500</td><td class="dim">Deposit in transit</td><td><span class="match-badge match-ok">RESOLVED</span></td></tr>
+              <tr><td class="mono dimmer">2024-01-12</td><td>FX conversion</td><td class="mono">$180</td><td class="dim">Rate rounding</td><td><span class="match-badge match-ok">RESOLVED</span></td></tr>
+              <tr><td class="mono dimmer">2024-01-10</td><td>Swap charge</td><td class="mono">$45</td><td class="dim">Calculation diff</td><td><span class="match-badge match-ok">RESOLVED</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: ALERTS
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-alerts">
+      <div class="page-title">Alerts <span>/ Last 24 hours</span></div>
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-title">All Alerts</div>
+          <div class="panel-tag tag-amber" id="all-alerts-tag">2 active</div>
+        </div>
+        <div class="panel-body" id="all-alerts-body"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: STOP-OUTS
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-stopouts">
+      <div class="page-title">Stop-outs <span>/ Accounts at risk</span></div>
+
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-title">Stop-out Candidates — Margin Level &lt; 150%</div>
+          <div class="panel-tag tag-amber">3 accounts</div>
+        </div>
+        <div class="panel-body" style="padding:0 14px">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th style="padding-left:0">Account</th>
+                <th>Symbol</th>
+                <th style="text-align:right">Margin %</th>
+                <th style="text-align:right">Equity</th>
+                <th style="text-align:right">Req Margin</th>
+                <th style="text-align:right">Lots</th>
+                <th style="padding-right:0;text-align:right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="stopout-table"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel panel-full">
+        <div class="panel-header"><div class="panel-title">Stop-out History — Today</div></div>
+        <div class="panel-body" style="padding:0 14px">
+          <table class="tbl">
+            <thead>
+              <tr>
+                <th style="padding-left:0">Time</th>
+                <th>Account</th>
+                <th>Symbol</th>
+                <th style="text-align:right">Loss ($)</th>
+                <th style="text-align:right">NBP Applied</th>
+                <th style="padding-right:0;text-align:right">Book</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td class="mono dimmer">09:34:21</td><td class="mono">#3391</td><td>GBP/USD</td><td class="mono red">($1,247)</td><td><span class="match-badge match-ok">No</span></td><td style="text-align:right"><span class="panel-tag tag-blue">A-BOOK</span></td></tr>
+              <tr><td class="mono dimmer">11:18:44</td><td class="mono">#7823</td><td>EUR/USD</td><td class="mono red">($892)</td><td><span class="match-badge match-ok">No</span></td><td style="text-align:right"><span class="panel-tag tag-amber">B-BOOK</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: TRADERS
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-traders">
+      <div class="page-title">Traders <span>/ Toxic flow detection & B-book routing</span></div>
+
+      <div class="metrics-grid" id="trader-summary-cards"></div>
+
+      <div class="panel panel-full">
+        <div class="panel-header">
+          <div class="panel-title">Trader Performance — Last 30 Days</div>
+          <div class="panel-tag tag-red" style="font-size:8px">SORTED BY TOXICITY</div>
+        </div>
+        <div class="panel-body" style="padding:0">
+          <table class="tbl" style="padding:0 14px">
+            <thead>
+              <tr>
+                <th style="padding-left:14px">Account</th>
+                <th>Name</th>
+                <th style="text-align:right">Trades</th>
+                <th style="text-align:right">Win Rate</th>
+                <th style="text-align:right">Net P&L</th>
+                <th style="text-align:center">Avg Hold</th>
+                <th style="text-align:center">Toxicity</th>
+                <th style="text-align:center">σ (GARCH)</th>
+                <th style="text-align:center">Rec</th>
+                <th style="text-align:center">Book</th>
+                <th style="padding-right:14px;text-align:right">Action</th>
+              </tr>
+            </thead>
+            <tbody id="trader-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="panel panel-full" id="mc-panel" style="display:none">
+        <div class="panel-header">
+          <div class="panel-title">GARCH(1,1) Risk Analysis — <span id="mc-trader-name"></span></div>
+          <div style="display:flex;gap:6px">
+            <div class="panel-tag tag-purple">GARCH(1,1)</div>
+            <div class="panel-tag tag-blue">500 paths / 30 days</div>
+          </div>
+        </div>
+
+        <!-- Dual MC charts + stats -->
+        <div class="mc-grid">
+          <div class="mc-grid-cell">
+            <div class="mc-chart-label">GARCH MC (vol clustering)</div>
+            <div class="chart-wrap" style="height:180px">
+              <canvas id="mc-garch-chart"></canvas>
+            </div>
+          </div>
+          <div class="mc-grid-cell">
+            <div class="mc-chart-label">Constant Vol MC (baseline)</div>
+            <div class="chart-wrap" style="height:180px">
+              <canvas id="mc-const-chart"></canvas>
+            </div>
+          </div>
+          <div class="mc-grid-cell mc-stats-cell" id="mc-stats"></div>
+        </div>
+
+        <!-- Vol term structure -->
+        <div style="border-top:1px solid var(--border);padding:12px 14px">
+          <div class="mc-chart-label" style="margin-bottom:6px">Volatility Term Structure — GARCH σ forecast (annualised) <span style="color:var(--text3);font-size:9px">dashed = long-run σ</span></div>
+          <div class="chart-wrap" style="height:100px">
+            <canvas id="vol-chart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ── TOAST CONTAINER ──────────────────────────────────── -->
+<div class="toast-wrap" id="toasts"></div>
+
+<!-- ── CHART.JS ─────────────────────────────────────────── -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+
+<!-- ── APP ENTRY POINT ──────────────────────────────────── -->
+<script type="module" src="js/app.js"></script>
+
+</body>
+</html>
