@@ -61,6 +61,18 @@
     <div class="nav-item" onclick="showView('stopouts', this)">
       <div class="nav-icon">⊘</div> Stop-outs
     </div>
+    <div class="nav-section" style="margin-top:8px">Compliance</div>
+    <div class="nav-item" onclick="showView('compliance', this)">
+      <div class="nav-icon">◫</div> KYC / AML
+      <div class="nav-badge red" id="kyc-badge">4</div>
+    </div>
+    <div class="nav-item" onclick="showView('withdrawals', this)">
+      <div class="nav-icon">⇅</div> Withdrawals
+      <div class="nav-badge amber" id="withdrawal-badge">2</div>
+    </div>
+    <div class="nav-item" onclick="showView('regulatory', this)">
+      <div class="nav-icon">⊞</div> Regulatory
+    </div>
   </nav>
 
   <!-- ── MAIN ───────────────────────────────────────────────── -->
@@ -576,6 +588,127 @@
             <canvas id="vol-chart"></canvas>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: KYC / AML
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-compliance">
+      <div class="page-title">KYC / AML <span>/ Compliance queue</span></div>
+
+      <!-- KYC stat cards -->
+      <div class="metrics-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:18px">
+        <div class="metric-card">
+          <div class="metric-label">Total Clients</div>
+          <div class="metric-value" id="kyc-total">—</div>
+        </div>
+        <div class="metric-card green-c">
+          <div class="metric-label">Approved</div>
+          <div class="metric-value green" id="kyc-approved">—</div>
+        </div>
+        <div class="metric-card amber-c">
+          <div class="metric-label">Pending / Review</div>
+          <div class="metric-value amber" id="kyc-pending">—</div>
+        </div>
+        <div class="metric-card red-c">
+          <div class="metric-label">Rejected</div>
+          <div class="metric-value red" id="kyc-rejected">—</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Avg Review Time</div>
+          <div class="metric-value" id="kyc-avg-time">—</div>
+        </div>
+      </div>
+
+      <!-- KYC queue table -->
+      <div class="panel" style="margin-bottom:18px">
+        <div class="panel-header">
+          <div class="panel-title">KYC Application Queue</div>
+          <div class="panel-tag tag-amber">PENDING REVIEW</div>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th style="padding-left:14px">Account</th>
+            <th>Name</th>
+            <th>Country</th>
+            <th>Status</th>
+            <th>Risk</th>
+            <th style="text-align:center">Submitted</th>
+            <th style="text-align:center">Wait</th>
+            <th style="text-align:right;padding-right:14px">Action</th>
+          </tr></thead>
+          <tbody id="kyc-queue-body"></tbody>
+        </table>
+      </div>
+
+      <!-- AML alerts table -->
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">AML Transaction Alerts</div>
+          <div class="panel-tag tag-red" id="aml-badge">0</div>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th style="padding-left:14px">Account</th>
+            <th>Name</th>
+            <th>Risk</th>
+            <th>Type</th>
+            <th style="text-align:right">Amount</th>
+            <th style="text-align:center">Flagged</th>
+            <th>Status</th>
+            <th style="text-align:right;padding-right:14px">Action</th>
+          </tr></thead>
+          <tbody id="aml-alerts-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: WITHDRAWALS
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-withdrawals">
+      <div class="page-title">Withdrawals <span>/ Approval queue</span></div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Pending Withdrawals</div>
+          <div style="font-size:11px;color:var(--text3)">★ = first withdrawal</div>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th style="padding-left:14px">Account</th>
+            <th>Name</th>
+            <th style="text-align:right">Amount</th>
+            <th>Method</th>
+            <th style="text-align:center">Requested</th>
+            <th>Status</th>
+            <th style="text-align:right;padding-right:14px">Action</th>
+          </tr></thead>
+          <tbody id="withdrawal-queue-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         VIEW: REGULATORY
+    ══════════════════════════════════════════════════════════ -->
+    <div class="view" id="view-regulatory">
+      <div class="page-title">Regulatory Reporting <span>/ Filing status</span></div>
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Report Filing Status</div>
+        </div>
+        <table class="data-table">
+          <thead><tr>
+            <th style="padding-left:14px">Report</th>
+            <th>Regulator</th>
+            <th style="text-align:center">Period</th>
+            <th style="text-align:center">Due</th>
+            <th>Status</th>
+            <th style="text-align:right;padding-right:14px">Filed On</th>
+          </tr></thead>
+          <tbody id="reg-status-body"></tbody>
+        </table>
       </div>
     </div>
 

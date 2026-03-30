@@ -26,17 +26,33 @@ Then open `http://localhost:3000`
 
 ## Views
 
+### Monitor
 | View | What it shows |
 |------|--------------|
 | **Overview** | Key metrics, B-book exposure bars, LP margin gauge, session health |
 | **Exposure** | B-book exposure per instrument, history chart, correlation risk |
 | **LP Sessions** | FIX session statuses, latency, rejection rates, uptime |
 | **Traders** | Per-trader toxicity, win rate, GARCH vol, A/B-book recommendation, Monte Carlo P&L simulation |
+
+### Finance
+| View | What it shows |
+|------|--------------|
 | **P&L Summary** | Revenue and cost breakdown, monthly trend |
 | **EMI Balances** | Segregated pool balances and segregation check |
+
+### Operations
+| View | What it shows |
+|------|--------------|
 | **Reconciliation** | Daily three-way match status and break log |
 | **Alerts** | Active and resolved alerts |
 | **Stop-outs** | Accounts approaching stop-out |
+
+### Compliance
+| View | What it shows |
+|------|--------------|
+| **KYC / AML** | KYC application queue with risk scoring, PEP/sanctions flags, approve/reject actions, AML transaction alerts with SAR filing |
+| **Withdrawals** | Pending withdrawal approval queue, first-withdrawal flagging, approve/reject actions |
+| **Regulatory** | Report filing status for EMIR, best execution, ICAAP, AML activity reports |
 
 ## Trader Intelligence
 
@@ -51,10 +67,13 @@ Then open `http://localhost:3000`
 Edit `js/config.js`:
 
 ```js
-API_BASE_URL: 'https://your-backoffice.com/api/v1',
-WS_URL:       'wss://your-backoffice.com/ws/risk',
+API_BASE_URL: 'https://your-backoffice.com/api/v1',   // Bridge / back office REST API
+WS_URL:       'wss://your-backoffice.com/ws/risk',    // Bridge WebSocket feed
 API_TOKEN:    'your-token',
 USE_MOCK:     false,
+
+KYC_BASE_URL: 'https://your-kyc-system.com/api/v1',  // Partner KYC system (optional)
+KYC_TOKEN:    'kyc-api-key',
 ```
 
 When `USE_MOCK: false` and `API_BASE_URL` is set, the dashboard switches from simulated data to live REST polling + WebSocket streaming. The WebSocket service auto-reconnects with exponential backoff.
@@ -86,15 +105,31 @@ risk-dashboard/
 ├── css/
 │   └── styles.css
 ├── js/
-│   ├── app.js            ← entry point
-│   ├── config.js         ← API/WS endpoints, thresholds
-│   ├── state.js          ← centralised state
+│   ├── app.js              ← entry point, action handlers
+│   ├── config.js           ← API/WS/KYC endpoints, thresholds
+│   ├── state.js            ← centralised state
 │   ├── utils.js
 │   ├── services/
-│   │   ├── api.js        ← REST client + field mapping
-│   │   ├── websocket.js  ← WS client, auto-reconnect
-│   │   └── mock.js       ← simulated data provider
-│   ├── renderers/        ← one file per view
-│   └── ui/               ← nav, clocks, toasts, charts
+│   │   ├── api.js          ← REST client + field mapping (bridge + KYC)
+│   │   ├── websocket.js    ← WS client, auto-reconnect, exponential backoff
+│   │   ├── mock.js         ← simulated data provider
+│   │   ├── garch.js        ← GARCH(1,1) volatility model
+│   │   └── montecarlo.js   ← Monte Carlo P&L simulation (1,000 paths)
+│   ├── renderers/
+│   │   ├── overview.js
+│   │   ├── exposure.js
+│   │   ├── sessions.js
+│   │   ├── traders.js      ← toxicity, GARCH, A/B-book recommendation
+│   │   ├── pnl.js
+│   │   ├── emi.js
+│   │   ├── recon.js
+│   │   ├── alerts.js
+│   │   ├── stopouts.js
+│   │   └── compliance.js   ← KYC queue, AML alerts, withdrawals, regulatory
+│   └── ui/
+│       ├── nav.js
+│       ├── clocks.js
+│       ├── toast.js
+│       └── charts.js
 └── package.json
 ```

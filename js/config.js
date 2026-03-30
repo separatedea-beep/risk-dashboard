@@ -19,6 +19,11 @@ export const CONFIG = {
   // ── Mock update interval ───────────────────────────────────
   MOCK_INTERVAL: 4000,       // ms between simulated updates
 
+  // ── KYC / Compliance API ───────────────────────────────────
+  // Set to your partner's KYC system endpoint when known
+  KYC_BASE_URL: '',          // e.g. 'https://kyc.yourpartner.com/api/v1'
+  KYC_TOKEN: '',             // API key or Bearer token
+
   // ── Thresholds ─────────────────────────────────────────────
   THRESHOLDS: {
     EXPOSURE_WARNING: 70,    // % of limit → amber

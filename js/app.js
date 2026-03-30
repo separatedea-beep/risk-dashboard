@@ -15,6 +15,7 @@ import { renderRecon } from './renderers/recon.js';
 import { renderAlerts } from './renderers/alerts.js';
 import { renderStopouts } from './renderers/stopouts.js';
 import { renderTraders } from './renderers/traders.js';
+import { renderCompliance } from './renderers/compliance.js';
 
 // ── WebSocket instance (available globally for debugging) ────
 const ws = new WebSocketService();
@@ -33,6 +34,7 @@ function renderAll() {
   renderRecon();
   renderStopouts();
   renderTraders();
+  renderCompliance();
 }
 
 // ── Actions (exposed to HTML onclick handlers) ───────────────
@@ -58,6 +60,53 @@ window.__rerouteTrader = async function (id) {
   const newBook = trader.book === 'B' ? 'A' : 'B';
   await ApiService.rerouteTrader(id, newBook);
   toast(`${trader.name} rerouted to ${newBook}-book`, newBook === 'A' ? 'green' : 'amber');
+  renderAll();
+};
+
+// ── Compliance actions ───────────────────────────────────────
+window.__approveKyc = async function (id) {
+  const client = S.kyc.queue.find(c => c.id === id);
+  if (client) { client.status = 'approved'; S.kyc.stats.pending = Math.max(0, S.kyc.stats.pending - 1); S.kyc.stats.approved++; }
+  await ApiService.approveKyc(id);
+  toast(`KYC approved — ${client?.name || id}`, 'green');
+  renderAll();
+};
+
+window.__rejectKyc = async function (id) {
+  const client = S.kyc.queue.find(c => c.id === id);
+  if (client) { client.status = 'rejected'; S.kyc.stats.pending = Math.max(0, S.kyc.stats.pending - 1); S.kyc.stats.rejected++; }
+  await ApiService.rejectKyc(id);
+  toast(`KYC rejected — ${client?.name || id}`, 'amber');
+  renderAll();
+};
+
+window.__fileSar = function (accountId) {
+  const alert = S.compliance.amlAlerts.find(a => a.accountId === accountId);
+  if (alert) alert.filed = true;
+  toast(`SAR filed for account ${accountId}`, 'red');
+  renderAll();
+};
+
+window.__dismissAml = function (accountId) {
+  const alert = S.compliance.amlAlerts.find(a => a.accountId === accountId);
+  if (alert) alert.dismissed = true;
+  toast(`AML alert dismissed — ${accountId}`, 'amber');
+  renderAll();
+};
+
+window.__approveWithdrawal = async function (accountId) {
+  const w = S.compliance.withdrawals.find(w => w.accountId === accountId);
+  if (w) w.status = 'approved';
+  await ApiService.approveWithdrawal(accountId);
+  toast(`Withdrawal approved — ${accountId}`, 'green');
+  renderAll();
+};
+
+window.__rejectWithdrawal = async function (accountId) {
+  const w = S.compliance.withdrawals.find(w => w.accountId === accountId);
+  if (w) w.status = 'rejected';
+  await ApiService.rejectWithdrawal(accountId);
+  toast(`Withdrawal rejected — ${accountId}`, 'amber');
   renderAll();
 };
 

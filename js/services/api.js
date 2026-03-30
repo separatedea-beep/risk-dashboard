@@ -101,4 +101,75 @@ export const ApiService = {
       body: JSON.stringify({ account_id: accountId }),
     });
   },
+
+  // ── KYC / Compliance ───────────────────────────────────────
+  // These call CONFIG.KYC_BASE_URL if set, otherwise fall back to mock.
+  // Field names are placeholders — adjust to match your partner's API schema.
+
+  async fetchKycQueue() {
+    if (!CONFIG.KYC_BASE_URL) return null; // mock data already in state
+    const headers = CONFIG.KYC_TOKEN
+      ? { 'Authorization': 'Bearer ' + CONFIG.KYC_TOKEN }
+      : {};
+    const res = await fetch(CONFIG.KYC_BASE_URL + '/kyc/queue', { headers });
+    if (!res.ok) throw new Error(`KYC API ${res.status}`);
+    const data = await res.json();
+    // ── Map your partner's field names here ──────────────────
+    return (data.applications || data).map(c => ({
+      id:         c.account_id   || c.id,
+      name:       c.full_name    || c.name,
+      country:    c.country_code || c.country,
+      status:     c.kyc_status   || c.status,   // 'pending'|'approved'|'rejected'|'review'
+      risk:       c.risk_level   || c.risk,      // 'low'|'medium'|'high'
+      pep:        c.is_pep       ?? c.pep        ?? false,
+      sanctioned: c.is_sanctioned ?? c.sanctioned ?? false,
+      submitted:  c.submitted_at || c.submitted,
+      waitHours:  c.wait_hours   || c.waitHours  || 0,
+    }));
+  },
+
+  async approveKyc(accountId) {
+    if (!CONFIG.KYC_BASE_URL) return { success: true };
+    return fetch(CONFIG.KYC_BASE_URL + '/kyc/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(CONFIG.KYC_TOKEN ? { Authorization: 'Bearer ' + CONFIG.KYC_TOKEN } : {}) },
+      body: JSON.stringify({ account_id: accountId }),
+    }).then(r => r.json());
+  },
+
+  async rejectKyc(accountId) {
+    if (!CONFIG.KYC_BASE_URL) return { success: true };
+    return fetch(CONFIG.KYC_BASE_URL + '/kyc/reject', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(CONFIG.KYC_TOKEN ? { Authorization: 'Bearer ' + CONFIG.KYC_TOKEN } : {}) },
+      body: JSON.stringify({ account_id: accountId }),
+    }).then(r => r.json());
+  },
+
+  async fetchWithdrawals() {
+    if (!CONFIG.KYC_BASE_URL) return null;
+    const headers = CONFIG.KYC_TOKEN ? { Authorization: 'Bearer ' + CONFIG.KYC_TOKEN } : {};
+    const res = await fetch(CONFIG.KYC_BASE_URL + '/withdrawals/pending', { headers });
+    if (!res.ok) throw new Error(`Withdrawals API ${res.status}`);
+    const data = await res.json();
+    return (data.withdrawals || data).map(w => ({
+      accountId:      w.account_id    || w.accountId,
+      name:           w.client_name   || w.name,
+      amount:         w.amount,
+      method:         w.method        || w.payment_method,
+      requested:      w.requested_at  || w.requested,
+      status:         w.status,
+      firstWithdrawal: w.first_withdrawal ?? w.firstWithdrawal ?? false,
+    }));
+  },
+
+  async approveWithdrawal(accountId) {
+    if (!CONFIG.KYC_BASE_URL) return { success: true };
+    return apiFetch('/withdrawals/approve', { method: 'POST', body: JSON.stringify({ account_id: accountId }) });
+  },
+
+  async rejectWithdrawal(accountId) {
+    if (!CONFIG.KYC_BASE_URL) return { success: true };
+    return apiFetch('/withdrawals/reject', { method: 'POST', body: JSON.stringify({ account_id: accountId }) });
+  },
 };

@@ -73,6 +73,41 @@ export const S = {
 
   selectedTraderId: null,
 
+  kyc: {
+    stats: { total: 312, approved: 278, pending: 18, rejected: 16, avgHours: 3.2 },
+    queue: [
+      { id: '#6621', name: 'T. Okonkwo',     country: 'NG', status: 'pending',  risk: 'high',   pep: false, sanctioned: false, submitted: 'Today 09:14', waitHours: 4 },
+      { id: '#6618', name: 'A. Petersen',     country: 'DK', status: 'pending',  risk: 'low',    pep: false, sanctioned: false, submitted: 'Today 08:52', waitHours: 5 },
+      { id: '#6605', name: 'M. Al-Farsi',     country: 'AE', status: 'review',   risk: 'high',   pep: true,  sanctioned: false, submitted: 'Yesterday',  waitHours: 19 },
+      { id: '#6599', name: 'L. Varga',        country: 'HU', status: 'pending',  risk: 'medium', pep: false, sanctioned: false, submitted: 'Yesterday',  waitHours: 22 },
+      { id: '#6588', name: 'C. Beaumont',     country: 'GB', status: 'approved', risk: 'low',    pep: false, sanctioned: false, submitted: '2d ago',     waitHours: 2 },
+      { id: '#6571', name: 'D. Volkov',       country: 'RU', status: 'rejected', risk: 'high',   pep: false, sanctioned: true,  submitted: '3d ago',     waitHours: 6 },
+    ],
+  },
+
+  compliance: {
+    amlAlerts: [
+      { accountId: '#3391', name: 'S. Nakamura', level: 'high',   type: 'RAPID WITHDRAWAL',   amount: 48000, flagged: 'Today 11:22',   filed: false,  dismissed: false },
+      { accountId: '#6571', name: 'D. Volkov',   level: 'high',   type: 'SANCTIONS MATCH',    amount: 12500, flagged: 'Yesterday',      filed: true,   dismissed: false },
+      { accountId: '#4471', name: 'M. Chen',     level: 'medium', type: 'UNUSUAL VOLUME',     amount: 31000, flagged: 'Today 08:05',   filed: false,  dismissed: false },
+      { accountId: '#2209', name: 'R. Petrov',   level: 'low',    type: 'STRUCTURING',        amount: 9800,  flagged: '2d ago',         filed: false,  dismissed: true  },
+    ],
+    withdrawals: [
+      { accountId: '#3391', name: 'S. Nakamura', amount: 48000, method: 'Wire',        requested: 'Today 11:18',  status: 'flagged',  firstWithdrawal: false },
+      { accountId: '#6618', name: 'A. Petersen', amount: 5200,  method: 'Card',        requested: 'Today 09:40',  status: 'pending',  firstWithdrawal: true  },
+      { accountId: '#8834', name: 'J. Williams', amount: 12300, method: 'Wire',        requested: 'Today 08:15',  status: 'pending',  firstWithdrawal: false },
+      { accountId: '#1156', name: 'L. Thompson', amount: 8900,  method: 'Crypto',      requested: 'Yesterday',    status: 'approved', firstWithdrawal: false },
+      { accountId: '#5502', name: 'D. Okafor',   amount: 2100,  method: 'Card',        requested: 'Yesterday',    status: 'approved', firstWithdrawal: false },
+    ],
+    regulatory: [
+      { report: 'Transaction Report (EMIR)',    regulator: 'CySEC',  period: 'Mar 2026', due: '15 Apr',  status: 'scheduled', filedOn: null },
+      { report: 'Best Execution (RTS 27)',      regulator: 'CySEC',  period: 'Q1 2026',  due: '30 Apr',  status: 'scheduled', filedOn: null },
+      { report: 'Capital Adequacy (ICAAP)',     regulator: 'CySEC',  period: 'Mar 2026', due: '31 Mar',  status: 'due',       filedOn: null },
+      { report: 'AML Activity Report',         regulator: 'CySEC',  period: 'Q4 2025',  due: 'Filed',   status: 'filed',     filedOn: '14 Jan 2026' },
+      { report: 'Transaction Report (EMIR)',    regulator: 'CySEC',  period: 'Feb 2026', due: 'Filed',   status: 'filed',     filedOn: '12 Mar 2026' },
+    ],
+  },
+
   recon: [
     { item: 'LP open positions vs back office',  a: '1,834',       b: '1,834',       ok: true },
     { item: 'LP realised P&L today',             a: '$13,065',     b: '$13,065',     ok: true },
